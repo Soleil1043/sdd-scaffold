@@ -4,6 +4,8 @@
 > TRAE / Claude Code → `AGENTS.md` / `CLAUDE.md` | Cursor → `.cursor/rules/*.mdc` | Windsurf → `.windsurfrules` | Cline → `.clinerules`
 > 如果切换 Harness，将本文件内容复制到对应文件即可。
 
+**标准开发流程**：需求分析 → 方案设计 → 构建 → 测试 → 上线。前两个阶段为对话式推进（产物：`.agent/需求规格说明书.md`、`.agent/设计说明书.md`），阶段结束由用户主动宣布；本文件约束构建及之后的执行。
+
 ---
 
 ## 1. 工作流约束（强制）
@@ -18,7 +20,8 @@
 4. **决策留痕**：遇到需要决策的技术选型，先写入 `decisions.md`（说明选项和理由），再继续
 5. **不超前实现**：只实现当前任务，不做"顺便"的额外功能
 6. **不删不改状态文件的历史记录**：`progress.md` 和 `decisions.md` 只追加不删除
-7. **需求变更走修订**：构建中要改功能，先用 `prompts.md` 的「需求变更 Prompt」修订 `spec.md` 并记录变更，同步 plan/tasks 后才改代码，不直接改实现
+7. **需求变更走修订**：构建中要改功能，先用 `prompts.md` 的「需求变更 Prompt」修订 `需求规格说明书.md` 并记录变更，同步设计说明书/tasks 后才改代码，不直接改实现
+8. **设计变动先算账**：任何架构/设计变动（技术栈、数据模型、模块结构、关键接口、第三方依赖），先在对话中分析**优势与代价**（收益、风险、影响范围、迁移成本），经用户主动确认后才执行；同步修订 `设计说明书.md`、在 `decisions.md` 记录、回退受影响任务，不直接改实现（见 `prompts.md` 的「设计变更 Prompt」）
 
 ## 2. 技术栈
 
@@ -49,13 +52,13 @@
 ## 5. 文件结构约定
 
 ```
-.agent/          ← 项目状态（Agent 读写，不删除）
-  spec.md        ← Phase 1: 需求文档
-  plan.md        ← Phase 2: 技术方案
-  tasks.md       ← Phase 3: 任务清单
-  progress.md    ← Phase 4: 构建日志
-  decisions.md   ← 全程: 决策记录
-  prompts.md     ← Prompt 模板参考
-src/             ← 实际代码
-tests/           ← 测试代码
+.agent/              ← 项目状态（Agent 读写，不删除）
+  需求规格说明书.md   ← Phase 1: 需求分析产物
+  设计说明书.md       ← Phase 2: 方案设计产物
+  tasks.md           ← Phase 3: 任务清单
+  progress.md        ← Phase 4: 构建日志
+  decisions.md       ← 全程: 决策记录
+  prompts.md         ← Prompt 模板参考
+src/                 ← 实际代码
+tests/               ← 测试代码
 ```

@@ -45,4 +45,4 @@ if ($insideRepo) {
   git -C $Target init | Out-Null
   Write-Output "Git repo initialized."
 }
-Write-Output "Next: customize AGENTS.md placeholders, add harness rule file, write README.md, decisions.md D001, then first commit."
+Write-Output "Next: replace [PROJECT_NAME] in AGENTS.md (tech-stack placeholders are backfilled after the design phase), add harness rule file, write README.md, decisions.md D001, then first commit."
