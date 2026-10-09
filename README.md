@@ -60,8 +60,8 @@ your-project/
 ├── README.md              ← 现场生成，非模板复制品
 ├── .cursor/rules/main.mdc ← 按 harness 生成的规则文件
 └── .agent/
-    ├── 需求规格说明书.md   ← Phase 1：需求分析产物（竞品参考 + Fxx 功能 + Exx 异常 + 变更记录）
-    ├── 设计说明书.md       ← Phase 2：方案设计产物（选型含代价 + 表结构 + API + 决策）
+    ├── spec.md            ← Phase 1：需求规格说明书（竞品参考 + Fxx 功能 + Exx 异常 + 变更记录）
+    ├── plan.md            ← Phase 2：设计说明书（选型含代价 + 表结构 + API + 决策）
     ├── tasks.md           ← Phase 3：任务清单（依赖 + 验收 + 覆盖标注）
     ├── progress.md        ← Phase 4：逐任务构建日志
     ├── decisions.md       ← 全程：决策记录（D0XX）
