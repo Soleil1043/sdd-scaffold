@@ -1,49 +1,59 @@
 #!/usr/bin/env bash
-# SDD scaffold init: copy skill template into a target directory.
-# Idempotent, never overwrites existing files. Git init only (first commit is
-# made by the agent after customization). Usage: init.sh [target-dir]
+# Copy the SDD template without overwriting files. Usage: init.sh [target-dir]
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_DIR="$SCRIPT_DIR/../assets/template"
 TARGET="${1:-.}"
+FILES=(status.md spec.md plan.md history.md)
 
-if [ ! -f "$TEMPLATE_DIR/AGENTS.md" ]; then
-  echo "ERROR: template not found at $TEMPLATE_DIR (keep scripts/ next to assets/)" >&2
+command -v git >/dev/null 2>&1 || { echo 'ERROR: git is not available' >&2; exit 1; }
+if [ -d "$TARGET/.agent" ] && [ ! -e "$TARGET/.agent/status.md" ]; then
+  echo 'ERROR: existing .agent has no status.md; inspect its existing rules or repair the incomplete initialization. No automatic migration was performed.' >&2
   exit 1
 fi
+for f in AGENTS.md "${FILES[@]/#/.agent/}"; do
+  if [ ! -f "$TEMPLATE_DIR/$f" ]; then
+    echo "ERROR: template missing: $TEMPLATE_DIR/$f" >&2
+    exit 1
+  fi
+done
 
-mkdir -p "$TARGET/.agent"
+mkdir -p -- "$TARGET"
+if [ "$(git -C "$TARGET" rev-parse --is-inside-work-tree 2>/dev/null || :)" = true ]; then
+  echo 'Git repo already present.'
+else
+  if ! git -C "$TARGET" init >/dev/null; then
+    echo 'ERROR: Git initialization failed.' >&2
+    exit 1
+  fi
+  echo 'Git repo initialized.'
+fi
+mkdir -p -- "$TARGET/.agent"
 
 created=()
 skipped=()
 copy_one() {
   local src="$1" dest="$2"
-  if [ -e "$dest" ]; then
+  if [ -e "$dest" ] || [ -L "$dest" ]; then
     skipped+=("$dest")
-  else
-    cp "$src" "$dest"
+  elif (set -o noclobber; cat -- "$src" > "$dest"); then
     created+=("$dest")
+  else
+    echo "ERROR: could not create $dest; existing files were not overwritten." >&2
+    return 1
   fi
 }
 
 copy_one "$TEMPLATE_DIR/AGENTS.md" "$TARGET/AGENTS.md"
-for f in "$TEMPLATE_DIR"/.agent/*.md; do
-  copy_one "$f" "$TARGET/.agent/$(basename "$f")"
+for f in "${FILES[@]}"; do
+  copy_one "$TEMPLATE_DIR/.agent/$f" "$TARGET/.agent/$f"
 done
 
-echo "Created:"
+echo 'Created:'
 printf '  %s\n' "${created[@]:-(none)}"
 if [ "${#skipped[@]}" -gt 0 ]; then
-  echo "Skipped (already exist, NOT overwritten):"
+  echo 'Skipped (already exist, NOT overwritten):'
   printf '  %s\n' "${skipped[@]}"
 fi
-
-if git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  echo "Git repo already present."
-else
-  git -C "$TARGET" init >/dev/null
-  echo "Git repo initialized."
-fi
-
-echo "Next: replace [PROJECT_NAME] in AGENTS.md (tech-stack placeholders are backfilled after the design phase), add harness rule file, write README.md, decisions.md D001, then first commit."
+echo 'Next: replace [PROJECT_NAME] in AGENTS.md; backfill technology after design; add the harness rule file and README; record D001 in plan.md and history.md, then make the first commit.'
